@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, ShoppingCart, Phone, Menu, ChevronDown, Package } from 'lucide-react';
-import { NAV_ITEMS, MEGA_MENU_ITEMS, SITE_SETTINGS } from '../data/staticData';
+import { NAV_ITEMS, MEGA_MENU_ITEMS, MEGA_MENU_SLUG_MAP, SITE_SETTINGS } from '../data/staticData';
 
 interface HeaderProps {
   onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
@@ -10,6 +10,15 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onNavigate, onCartClick, cartCount }) => {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      onNavigate('collection', `search:${searchQuery.trim()}`);
+      setSearchQuery('');
+    }
+  };
 
   return (
     <header className="flex flex-col w-full relative z-50 font-sans">
@@ -41,18 +50,20 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onCartClick, cartCou
             </button>
           </div>
 
-          <div className="flex-1 max-w-3xl hidden md:flex">
+          <form onSubmit={handleSearch} className="flex-1 max-w-3xl hidden md:flex">
             <div className="relative w-full flex">
                 <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by SKU, Product Name, or Category..."
                 className="w-full h-12 px-4 border border-gray-300 rounded-l-md text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-900 focus:border-blue-900 bg-gray-50 hover:bg-white transition-colors"
                 />
-                <button className="bg-[#0f172a] hover:bg-[#1e293b] text-white h-12 px-8 rounded-r-md flex items-center justify-center transition-colors font-medium">
+                <button type="submit" className="bg-[#0f172a] hover:bg-[#1e293b] text-white h-12 px-8 rounded-r-md flex items-center justify-center transition-colors font-medium">
                 <Search className="w-5 h-5" />
                 </button>
             </div>
-          </div>
+          </form>
 
           <div className="flex items-center gap-6 shrink-0">
             <Search className="w-6 h-6 md:hidden text-gray-700" />
@@ -70,18 +81,20 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onCartClick, cartCou
           </div>
         </div>
 
-        <div className="md:hidden mt-4">
+        <form onSubmit={handleSearch} className="md:hidden mt-4">
           <div className="flex w-full relative">
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search wholesale products..."
               className="w-full h-10 px-4 border border-gray-300 rounded-md text-black focus:outline-none focus:border-blue-900"
             />
-             <button className="absolute right-0 top-0 bg-gray-200 h-10 w-12 rounded-r-md flex items-center justify-center text-gray-700 border border-l-0 border-gray-300">
+             <button type="submit" className="absolute right-0 top-0 bg-gray-200 h-10 w-12 rounded-r-md flex items-center justify-center text-gray-700 border border-l-0 border-gray-300">
               <Search className="w-4 h-4" />
             </button>
           </div>
-        </div>
+        </form>
       </div>
 
       <nav className="bg-[#1e293b] text-white border-t border-gray-800 shadow-md relative z-10">
@@ -105,12 +118,12 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onCartClick, cartCou
                             <ul className="space-y-3 mb-6 flex-1">
                                 {section.items.map((item, i) => (
                                     <li key={i}>
-                                        <button onClick={() => onNavigate('collection', section.category.toLowerCase().replace(/\s+/g, '-'))} className="text-sm text-gray-600 hover:text-[#dc2626] hover:underline block transition-colors text-left">{item}</button>
+                                        <button onClick={() => onNavigate('collection', MEGA_MENU_SLUG_MAP[item] || '')} className="text-sm text-gray-600 hover:text-[#dc2626] hover:underline block transition-colors text-left">{item}</button>
                                     </li>
                                 ))}
                             </ul>
                             {section.image && (
-                            <div className="mt-auto cursor-pointer relative overflow-hidden rounded-md h-32" onClick={() => onNavigate('collection', section.category.toLowerCase().replace(/\s+/g, '-'))}>
+                            <div className="mt-auto cursor-pointer relative overflow-hidden rounded-md h-32" onClick={() => onNavigate('collection')}>
                                 <img src={section.image} alt={section.category} className="w-full h-full object-cover" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
                                     <span className="text-yellow-400 text-[10px] font-bold uppercase">{section.featuredHeader}</span>
@@ -136,7 +149,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onCartClick, cartCou
             {NAV_ITEMS.map((item) => (
                 <button
                 key={item.id}
-                onClick={() => onNavigate('collection', item.slug)}
+                onClick={() => onNavigate('collection', item.slug || undefined)}
                 className={`text-sm font-medium whitespace-nowrap transition-colors hover:text-gray-300 ${item.isRed ? 'text-[#fca5a5]' : 'text-gray-100'}`}
                 >
                 {item.label}

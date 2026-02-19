@@ -1,38 +1,93 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { ChevronDown, X, ShoppingCart, LayoutGrid, List, ChevronRight } from 'lucide-react';
-import { useSupabaseData } from '../hooks/useSupabaseData';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { ChevronDown, X, ShoppingCart, LayoutGrid, List, Loader2 } from 'lucide-react';
 import { fetchProducts, fetchCategories } from '../services/dataService';
 import { useCart } from '../context/CartContext';
-import type { Product } from '../types';
+import { CATEGORIES } from '../data/staticData';
+import type { Product, Category } from '../types';
 
 interface CollectionPageProps {
   onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
   categorySlug?: string;
 }
 
+const ITEMS_PER_PAGE = 24;
+
 export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate, categorySlug }) => {
   const [showOutOfStock, setShowOutOfStock] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'quick-stock'>('grid');
   const [sortBy, setSortBy] = useState('recommended');
   const [selectedCat, setSelectedCat] = useState<string | undefined>(categorySlug);
+  const [searchQuery, setSearchQuery] = useState('');
   const { addToCart } = useCart();
 
+  const [products, setProducts] = useState<Product[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [offset, setOffset] = useState(0);
+
+  const [dbCategories, setDbCategories] = useState<Category[]>([]);
+
   useEffect(() => {
-    setSelectedCat(categorySlug);
+    if (categorySlug?.startsWith('search:')) {
+      setSearchQuery(categorySlug.slice(7));
+      setSelectedCat(undefined);
+    } else if (categorySlug === 'deals') {
+      setSelectedCat(undefined);
+      setSearchQuery('');
+    } else {
+      setSelectedCat(categorySlug);
+      setSearchQuery('');
+    }
   }, [categorySlug]);
 
-  const { data: categories } = useSupabaseData(() => fetchCategories(), []);
-  const { data, loading } = useSupabaseData(() => fetchProducts({ limit: 50 }), []);
-  const allProducts = data?.products || [];
+  useEffect(() => {
+    fetchCategories().then(setDbCategories).catch(() => {});
+  }, []);
+
+  const loadProducts = useCallback(async (reset = false) => {
+    const newOffset = reset ? 0 : offset;
+    if (reset) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
+
+    try {
+      const result = await fetchProducts({
+        categorySlug: selectedCat || undefined,
+        limit: ITEMS_PER_PAGE,
+        offset: newOffset,
+        search: searchQuery || undefined,
+      });
+
+      if (reset) {
+        setProducts(result.products);
+        setOffset(ITEMS_PER_PAGE);
+      } else {
+        setProducts(prev => [...prev, ...result.products]);
+        setOffset(prev => prev + ITEMS_PER_PAGE);
+      }
+      setTotalCount(result.total);
+    } catch (err) {
+      console.error('Failed to load products:', err);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, [selectedCat, searchQuery, offset]);
+
+  useEffect(() => {
+    setOffset(0);
+    loadProducts(true);
+  }, [selectedCat, searchQuery]);
+
+  const handleLoadMore = () => {
+    loadProducts(false);
+  };
 
   const filteredProducts = useMemo(() => {
-    let result = allProducts;
-    if (selectedCat) {
-      result = result.filter(p => {
-        const catMatch = categories?.find(c => c.slug === selectedCat);
-        return catMatch ? p.categoryId === catMatch.id : true;
-      });
-    }
+    let result = products;
     if (!showOutOfStock) {
       result = result.filter(p => p.stockStatus !== 'out_of_stock');
     }
@@ -40,18 +95,32 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate, cate
       result = [...result].sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-high') {
       result = [...result].sort((a, b) => b.price - a.price);
+    } else if (sortBy === 'name') {
+      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
     }
     return result;
-  }, [allProducts, selectedCat, showOutOfStock, sortBy, categories]);
+  }, [products, showOutOfStock, sortBy]);
+
+  const categories = dbCategories.length > 0 ? dbCategories : CATEGORIES;
 
   const activeCatName = selectedCat
-    ? categories?.find(c => c.slug === selectedCat)?.name || selectedCat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    ? categories.find(c => c.slug === selectedCat)?.name || selectedCat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    : searchQuery
+    ? `Search: "${searchQuery}"`
     : 'All Products';
 
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
     addToCart(product);
   };
+
+  const handleCategorySelect = (slug: string | undefined) => {
+    setSelectedCat(slug);
+    setSearchQuery('');
+    window.scrollTo(0, 0);
+  };
+
+  const hasMore = products.length < totalCount;
 
   return (
     <div className="bg-white min-h-screen">
@@ -61,15 +130,15 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate, cate
           <aside className="w-full md:w-64 shrink-0 font-sans">
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Shop By</h2>
 
-            {selectedCat && (
+            {(selectedCat || searchQuery) && (
               <div className="bg-[#f2f7fa] p-4 border border-[#d6e3eb] rounded mb-6">
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-[10px] font-black text-[#0f172a] uppercase tracking-wider">Active Filters:</span>
-                  <button onClick={() => setSelectedCat(undefined)} className="text-[9px] font-bold text-[#0b668d] hover:underline uppercase">Reset Filters</button>
+                  <button onClick={() => handleCategorySelect(undefined)} className="text-[9px] font-bold text-[#0b668d] hover:underline uppercase">Reset Filters</button>
                 </div>
                 <div className="bg-[#0b668d] text-white text-[11px] font-bold px-3 py-2 flex items-center justify-between rounded shadow-sm">
                   <span className="uppercase tracking-wide">{activeCatName}</span>
-                  <button onClick={() => setSelectedCat(undefined)}><X size={12} /></button>
+                  <button onClick={() => handleCategorySelect(undefined)}><X size={12} /></button>
                 </div>
               </div>
             )}
@@ -90,10 +159,16 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate, cate
 
             <div className="space-y-1">
               <h3 className="text-sm font-bold text-[#0f172a] mb-3">Categories</h3>
-              {(categories || []).map(cat => (
+              <button
+                onClick={() => handleCategorySelect(undefined)}
+                className={`block w-full text-left px-3 py-2 rounded text-sm transition-colors ${!selectedCat ? 'bg-[#0b668d] text-white font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-[#0f172a]'}`}
+              >
+                All Products
+              </button>
+              {categories.map(cat => (
                 <button
                   key={cat.id}
-                  onClick={() => setSelectedCat(cat.slug === selectedCat ? undefined : cat.slug)}
+                  onClick={() => handleCategorySelect(cat.slug === selectedCat ? undefined : cat.slug)}
                   className={`block w-full text-left px-3 py-2 rounded text-sm transition-colors ${cat.slug === selectedCat ? 'bg-[#0b668d] text-white font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-[#0f172a]'}`}
                 >
                   {cat.name}
@@ -113,7 +188,7 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate, cate
                   <h1 className="text-2xl md:text-3xl font-black text-[#0f172a] leading-tight tracking-tight uppercase">
                     {activeCatName}
                   </h1>
-                  <p className="text-sm text-gray-400 mt-2 font-medium">({filteredProducts.length} items)</p>
+                  <p className="text-sm text-gray-400 mt-2 font-medium">({totalCount} items)</p>
                 </div>
 
                 <div className="flex items-center gap-6">
@@ -142,6 +217,7 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate, cate
                             <option value="recommended">Recommended</option>
                             <option value="price-low">Price: Low to High</option>
                             <option value="price-high">Price: High to Low</option>
+                            <option value="name">Name: A to Z</option>
                           </select>
                           <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                       </div>
@@ -164,11 +240,12 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate, cate
               <div className="text-center py-20">
                 <p className="text-lg font-bold text-gray-400 mb-2">No products found</p>
                 <p className="text-sm text-gray-400 mb-6">Try adjusting your filters or browse all products</p>
-                <button onClick={() => setSelectedCat(undefined)} className="bg-[#0f172a] text-white px-6 py-3 rounded font-bold hover:bg-[#1e293b] transition-colors">
+                <button onClick={() => handleCategorySelect(undefined)} className="bg-[#0f172a] text-white px-6 py-3 rounded font-bold hover:bg-[#1e293b] transition-colors">
                   View All Products
                 </button>
               </div>
             ) : viewMode === 'grid' ? (
+              <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {filteredProducts.map((product) => (
                     <div key={product.id} className="flex flex-col h-full bg-white border border-transparent hover:border-gray-100 hover:shadow-xl transition-all p-4 rounded-xl cursor-pointer" onClick={() => onNavigate('product', product.slug)}>
@@ -195,6 +272,9 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate, cate
                            {product.badge === 'ON_SALE' && (
                              <div className="bg-[#cc2b1e] text-white px-2 py-1 rounded-sm text-[8px] font-black uppercase">ON SALE</div>
                            )}
+                           {product.badge === 'BUY_MORE_SAVE' && (
+                             <div className="bg-[#0b668d] text-white px-2 py-1 rounded-sm text-[8px] font-black uppercase">Buy More Save</div>
+                           )}
                            <div className="flex flex-col">
                               <span className="text-lg font-black text-[#cc2b1e] tracking-tighter">${product.price.toFixed(2)}</span>
                               {product.originalPrice && (
@@ -213,7 +293,24 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate, cate
                     </div>
                 ))}
               </div>
+              {hasMore && (
+                <div className="flex justify-center mt-12">
+                  <button
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    className="bg-[#0f172a] text-white px-10 py-4 rounded-lg font-bold hover:bg-[#1e293b] transition-colors flex items-center gap-3 disabled:opacity-50"
+                  >
+                    {loadingMore ? (
+                      <><Loader2 size={18} className="animate-spin" /> Loading...</>
+                    ) : (
+                      <>Load More Products ({products.length} of {totalCount})</>
+                    )}
+                  </button>
+                </div>
+              )}
+              </>
             ) : (
+              <>
               <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
                 <table className="w-full text-left text-sm">
                    <thead className="bg-gray-50 border-b border-gray-200">
@@ -252,6 +349,22 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate, cate
                    </tbody>
                 </table>
               </div>
+              {hasMore && (
+                <div className="flex justify-center mt-12">
+                  <button
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    className="bg-[#0f172a] text-white px-10 py-4 rounded-lg font-bold hover:bg-[#1e293b] transition-colors flex items-center gap-3 disabled:opacity-50"
+                  >
+                    {loadingMore ? (
+                      <><Loader2 size={18} className="animate-spin" /> Loading...</>
+                    ) : (
+                      <>Load More Products ({products.length} of {totalCount})</>
+                    )}
+                  </button>
+                </div>
+              )}
+              </>
             )}
           </main>
         </div>

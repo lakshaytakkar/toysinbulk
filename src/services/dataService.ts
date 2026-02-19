@@ -18,6 +18,22 @@ export async function fetchCategories(): Promise<Category[]> {
   }));
 }
 
+export async function fetchCategoryBySlug(slug: string): Promise<{ id: string; name: string; slug: string } | null> {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, name, slug')
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw error;
+  }
+
+  return data;
+}
+
 export async function fetchBrands(): Promise<Brand[]> {
   const { data, error } = await supabase
     .from('brands')
@@ -132,11 +148,24 @@ export async function fetchSiteSettings(): Promise<Record<string, string>> {
 
 export async function fetchProducts(options?: {
   featured?: boolean;
+  categoryId?: string;
   categorySlug?: string;
   limit?: number;
   offset?: number;
   search?: string;
+  maxPrice?: number;
 }): Promise<{ products: Product[]; total: number }> {
+  let categoryId = options?.categoryId;
+
+  if (!categoryId && options?.categorySlug) {
+    const cat = await fetchCategoryBySlug(options.categorySlug);
+    if (cat) {
+      categoryId = cat.id;
+    } else {
+      return { products: [], total: 0 };
+    }
+  }
+
   let query = supabase
     .from('products')
     .select(`
@@ -150,20 +179,23 @@ export async function fetchProducts(options?: {
     query = query.eq('is_featured', true);
   }
 
-  if (options?.categorySlug) {
-    query = query.eq('categories.slug', options.categorySlug);
+  if (categoryId) {
+    query = query.eq('category_id', categoryId);
   }
 
   if (options?.search) {
     query = query.ilike('name', `%${options.search}%`);
   }
 
+  if (options?.maxPrice) {
+    query = query.lte('price', options.maxPrice);
+  }
+
   query = query.order('sort_order');
 
-  if (options?.limit) {
-    const offset = options.offset || 0;
-    query = query.range(offset, offset + options.limit - 1);
-  }
+  const limit = options?.limit || 24;
+  const offset = options?.offset || 0;
+  query = query.range(offset, offset + limit - 1);
 
   const { data, error, count } = await query;
   if (error) throw error;
@@ -196,7 +228,9 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     const specs: Record<string, string> = {};
     const sortedSpecs = [...data.product_specifications].sort((a: any, b: any) => a.sort_order - b.sort_order);
     sortedSpecs.forEach((spec: any) => {
-      specs[spec.spec_key] = spec.spec_value;
+      if (spec.spec_key !== 'Short Description' && spec.spec_key !== 'Original SKU') {
+        specs[spec.spec_key] = spec.spec_value;
+      }
     });
     product.specifications = specs;
   }
