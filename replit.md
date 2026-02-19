@@ -84,6 +84,14 @@ A React + TypeScript frontend application for ToysinBulk, America's wholesale to
 - Built full cart system with CartContext and CartDrawer component
 - Added 2 NC office addresses to Footer (Charlotte HQ, Fayetteville distribution center)
 - Replaced Wikipedia SVG brand logos with local PNG images
+- Synced all 13 static categories with real DB data (Other Toys, Fidget Toys, Plush Toys, Bath Toys, Puzzles, Seasonal Toys, Dolls & Figures, Party Supplies, Arts & Crafts, Bulk Candy, Winter Decor, Wrapped Candy, Novelty Items)
+- Fixed dataService.ts: proper server-side category filtering via category_id lookups (fetchCategoryBySlug helper)
+- CollectionPage: server-side pagination (24 items/page) with Load More, accurate totalCount from Supabase
+- ProductPage: expandable/collapsible accordion sections, specs in table format, ROI calculator with real data, dynamic breadcrumbs
+- Updated nav items and mega menu to map to real DB category slugs
+- Added search functionality in Header with query handling
+- Fixed broken Disney/Marvel brand logos (now SVG), added stock photo category images for new categories
+- Database: 563 total products, 13 categories, 7 categories with products
 
 ## Development
 - **Dev server**: `npm run dev` (runs on port 5000)
