@@ -1,22 +1,26 @@
 # ToysinBulk - Wholesale Toy Distributor Website
 
 ## Overview
-A React + TypeScript frontend application for ToysinBulk, America's wholesale toy distributor. The site showcases wholesale toy products with category browsing, product pages, collection views, and a full cart system. All data is dynamically fetched from a Supabase PostgreSQL database. Public-facing ecommerce website without authentication flows.
+A React + TypeScript frontend application for ToysinBulk, America's wholesale toy distributor. The site uses a hybrid architecture: UI elements (navigation, categories, brands, banners, settings) are hardcoded as static data for fast loading, while product data (collections, product details, featured items) is dynamically fetched from Supabase PostgreSQL. Public-facing ecommerce website without authentication flows.
 
 ## Project Architecture
 - **Framework**: React 19 with TypeScript
 - **Build Tool**: Vite 6
-- **Backend**: Supabase (PostgreSQL with Row Level Security)
+- **Backend**: Supabase (PostgreSQL with Row Level Security) - used for product data only
 - **Styling**: Tailwind CSS (via CDN)
 - **Font**: Montserrat (Google Fonts)
 - **Navigation**: React state-based view switching (home, collection, product) with slug-based category/product routing
 - **State Management**: React Context (CartContext) for cart state
+- **Data Architecture**: Hybrid static + dynamic
+  - **Static** (src/data/staticData.ts): nav items, mega menu, categories, brands, industries, banners, site settings
+  - **Dynamic** (Supabase): products, product images, product specifications, collections
 
 ## Supabase Database
 - **Project**: aejmkvfbqfshvzbphmql
-- **Tables**: categories, products, product_images, product_specifications, brands, industries, banners, nav_items, mega_menu_items, site_settings
+- **Tables used dynamically**: products, product_images, product_specifications, categories (for product filtering)
+- **Tables with static copies**: nav_items, mega_menu_items, categories, brands, industries, banners, site_settings
 - **RLS**: All tables have public read access policies enabled
-- **Images**: Served from local `/images/` directory (paths stored in database)
+- **Images**: Served from local `/images/` directory (paths stored in database and static data)
 
 ## Project Structure
 ```
@@ -30,28 +34,30 @@ A React + TypeScript frontend application for ToysinBulk, America's wholesale to
 │   ├── App.tsx          # Main application component with view routing, cart provider
 │   ├── index.tsx        # React entry point
 │   ├── types.ts         # TypeScript type definitions
+│   ├── data/
+│   │   └── staticData.ts # Hardcoded UI data (nav, categories, brands, banners, settings)
 │   ├── context/
 │   │   └── CartContext.tsx # Cart state management (add/remove/update/clear)
 │   ├── lib/
 │   │   └── supabase.ts  # Supabase client initialization
 │   ├── services/
-│   │   └── dataService.ts # Data fetch functions for all tables
+│   │   └── dataService.ts # Data fetch functions for products (Supabase)
 │   ├── hooks/
 │   │   └── useSupabaseData.ts # Custom React hook for data fetching
 │   └── components/
-│       ├── BrandGrid.tsx
-│       ├── CartDrawer.tsx       # Sliding cart sidebar with quantity controls
-│       ├── CategoryGrid.tsx
-│       ├── CharacterShopBanner.tsx
-│       ├── CollectionPage.tsx   # Product listing with category filtering
-│       ├── Footer.tsx           # Includes NC office addresses
-│       ├── Header.tsx           # Nav bar with cart count badge
-│       ├── Hero.tsx
-│       ├── IndustryGrid.tsx
-│       ├── PriceBanners.tsx
-│       ├── ProductCarousel.tsx
-│       ├── ProductPage.tsx      # Product detail with add to cart
-│       └── TrustBar.tsx
+│       ├── BrandGrid.tsx          # Static - uses BRANDS from staticData
+│       ├── CartDrawer.tsx         # Sliding cart sidebar with quantity controls
+│       ├── CategoryGrid.tsx       # Static - uses CATEGORIES from staticData
+│       ├── CharacterShopBanner.tsx # Static - uses CHARACTER_SHOP_BANNER from staticData
+│       ├── CollectionPage.tsx     # Dynamic - fetches products from Supabase
+│       ├── Footer.tsx             # Static - hardcoded content with NC addresses
+│       ├── Header.tsx             # Static - uses NAV_ITEMS, MEGA_MENU_ITEMS, SITE_SETTINGS
+│       ├── Hero.tsx               # Static - uses HERO_BANNER from staticData
+│       ├── IndustryGrid.tsx       # Static - uses INDUSTRIES from staticData
+│       ├── PriceBanners.tsx       # Static - uses PRICE_BANNERS from staticData
+│       ├── ProductCarousel.tsx    # Dynamic - fetches featured products from Supabase
+│       ├── ProductPage.tsx        # Dynamic - fetches product details from Supabase
+│       └── TrustBar.tsx           # Static - hardcoded trust items
 └── package.json
 ```
 
@@ -59,29 +65,25 @@ A React + TypeScript frontend application for ToysinBulk, America's wholesale to
 - **Cart System**: CartContext provides global cart state. CartDrawer is a right-sliding panel with quantity controls, item removal, subtotal calculation, and free shipping threshold ($250).
 - **Category Navigation**: Nav items pass category slugs to CollectionPage for filtered product views. Categories in CategoryGrid also link with slugs.
 - **Product Navigation**: Products link via slug to ProductPage for detail view.
-- **Brand Logos**: Local PNG images in /images/brand-*.png (database stores paths)
-- **Promo Banners**: Database-seeded price point banners (Under $1, $5, $10, BULK)
+- **Brand Logos**: Local PNG images in /images/brand-*.png
+- **Promo Banners**: Static price point banners (Under $1, $5, $10, BULK)
 
 ## Data Flow
-1. Components use `useSupabaseData` hook to fetch data on mount
-2. Hook calls functions from `dataService.ts` which query Supabase
-3. Loading states show skeleton placeholders while data loads
-4. Error states are handled gracefully with fallback content
+1. **Static components** import data directly from `src/data/staticData.ts` - no loading states needed
+2. **Dynamic components** (CollectionPage, ProductPage, ProductCarousel) use `useSupabaseData` hook
+3. Hook calls functions from `dataService.ts` which query Supabase for product data
+4. Loading states show skeleton placeholders while product data loads
 5. Cart state managed via React Context (CartContext)
 
 ## Recent Changes (Feb 2026)
+- Converted to hybrid architecture: static UI data + dynamic product data
+- Created src/data/staticData.ts with all hardcoded UI content
+- Updated 8 components to use static data: Header, Hero, CategoryGrid, BrandGrid, IndustryGrid, PriceBanners, CharacterShopBanner, TrustBar
+- Kept CollectionPage, ProductPage, ProductCarousel dynamic for team product updates
+- Removed loading skeletons from static components (instant render)
 - Built full cart system with CartContext and CartDrawer component
-- Fixed navigation to pass category slugs and filter CollectionPage by category
-- Integrated Add to Cart functionality across all product displays
-- Updated scroll behavior to instant for better UX
-- Connected nav items (Deals, Christmas, etc.) to category-filtered collection pages
-- Added cart count badge to Header with real-time updates
 - Added 2 NC office addresses to Footer (Charlotte HQ, Fayetteville distribution center)
-- Removed "Contact Procurement" section from BrandGrid
 - Replaced Wikipedia SVG brand logos with local PNG images
-- Seeded promo banners in database for PriceBanners component
-- Optimized Hero text sizing for responsive display
-- Added onError fallback for brand logo images
 
 ## Development
 - **Dev server**: `npm run dev` (runs on port 5000)
@@ -94,3 +96,5 @@ A React + TypeScript frontend application for ToysinBulk, America's wholesale to
 - No development tools visible to end users
 - No authentication/login flows - public website only
 - Clean, production-ready ecommerce UI
+- Keep products/collections dynamic for team updates
+- Make all other UI content static/hardcoded
