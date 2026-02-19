@@ -49,13 +49,13 @@ export const MEGA_MENU_SLUG_MAP: Record<string, string> = {
 };
 
 export const CATEGORIES: Category[] = [
-  { id: 'cat-1', name: 'Other Toys', slug: 'other-toys', image: '/images/category-other-toys.png' },
-  { id: 'cat-2', name: 'Fidget Toys', slug: 'fidget-toys', image: '/images/category-fidget-toys.png' },
+  { id: 'cat-1', name: 'Other Toys', slug: 'other-toys', image: '/images/category-other-toys.jpg' },
+  { id: 'cat-2', name: 'Fidget Toys', slug: 'fidget-toys', image: '/images/category-fidget-toys.jpg' },
   { id: 'cat-3', name: 'Plush Toys', slug: 'plush-toys', image: '/images/category-plush-toys.png' },
-  { id: 'cat-4', name: 'Bath Toys', slug: 'bath-toys', image: '/images/category-bath-toys.png' },
-  { id: 'cat-5', name: 'Puzzles', slug: 'puzzles', image: '/images/category-puzzles.png' },
+  { id: 'cat-4', name: 'Bath Toys', slug: 'bath-toys', image: '/images/category-bath-toys.jpg' },
+  { id: 'cat-5', name: 'Puzzles', slug: 'puzzles', image: '/images/category-puzzles.jpg' },
   { id: 'cat-6', name: 'Seasonal Toys', slug: 'seasonal-toys', image: '/images/category-seasonal-toys.png' },
-  { id: 'cat-7', name: 'Dolls & Figures', slug: 'dolls-figures', image: '/images/category-dolls-figures.png' },
+  { id: 'cat-7', name: 'Dolls & Figures', slug: 'dolls-figures', image: '/images/category-dolls-figures.jpg' },
   { id: 'cat-8', name: 'Party Supplies', slug: 'party-supplies', image: '/images/category-party-supplies.png' },
   { id: 'cat-9', name: 'Arts & Crafts', slug: 'arts-crafts', image: '/images/category-arts-crafts.png' },
   { id: 'cat-10', name: 'Bulk Candy', slug: 'bulk-candy', image: '/images/category-bulk-candy.png' },
@@ -68,9 +68,9 @@ export const BRANDS: Brand[] = [
   { id: 'brand-1', name: 'LEGO', slug: 'lego', logo: '/images/brand-lego.png' },
   { id: 'brand-2', name: 'Mattel', slug: 'mattel', logo: '/images/brand-mattel.png' },
   { id: 'brand-3', name: 'Hasbro', slug: 'hasbro', logo: '/images/brand-hasbro.png' },
-  { id: 'brand-4', name: 'Disney', slug: 'disney', logo: '/images/brand-disney.png' },
+  { id: 'brand-4', name: 'Disney', slug: 'disney', logo: '/images/brand-disney.svg' },
   { id: 'brand-5', name: 'Nintendo', slug: 'nintendo', logo: '/images/brand-nintendo.png' },
-  { id: 'brand-6', name: 'Marvel', slug: 'marvel', logo: '/images/brand-marvel.png' },
+  { id: 'brand-6', name: 'Marvel', slug: 'marvel', logo: '/images/brand-marvel.svg' },
   { id: 'brand-7', name: 'Star Wars', slug: 'star-wars', logo: '/images/brand-star-wars.png' },
   { id: 'brand-8', name: 'Pokemon', slug: 'pokemon', logo: '/images/brand-pokemon.png' },
 ];
