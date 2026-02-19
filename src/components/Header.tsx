@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Search, ShoppingCart, Phone, Menu, ChevronDown, Package } from 'lucide-react';
-import { useSupabaseData } from '../hooks/useSupabaseData';
-import { fetchNavItems, fetchMegaMenuItems, fetchSiteSettings } from '../services/dataService';
+import { NAV_ITEMS, MEGA_MENU_ITEMS, SITE_SETTINGS } from '../data/staticData';
 
 interface HeaderProps {
   onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
@@ -11,12 +10,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onNavigate, onCartClick, cartCount }) => {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
-  const { data: navItems } = useSupabaseData(() => fetchNavItems(), []);
-  const { data: megaMenu } = useSupabaseData(() => fetchMegaMenuItems(), []);
-  const { data: settings } = useSupabaseData(() => fetchSiteSettings(), []);
-
-  const phone = settings?.phone_number || '1-888-TOYS-BULK';
-  const promoText = settings?.promo_bar_text || 'Free Shipping on Wholesale Orders Over $250';
 
   return (
     <header className="flex flex-col w-full relative z-50 font-sans">
@@ -27,12 +20,12 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onCartClick, cartCou
                  USA Owned & Operated
             </span>
             <span className="text-gray-400">|</span>
-            <span>{promoText}</span>
+            <span>{SITE_SETTINGS.promo_bar_text}</span>
         </div>
         <div className="flex items-center gap-6">
             <button onClick={() => onNavigate('home')} className="hover:text-gray-300 transition-colors">Business Accounts</button>
             <span className="text-gray-400">|</span>
-            <span className="flex items-center gap-2"><Phone size={12}/> {phone}</span>
+            <span className="flex items-center gap-2"><Phone size={12}/> {SITE_SETTINGS.phone_number}</span>
         </div>
       </div>
 
@@ -44,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onCartClick, cartCou
             </button>
             <button onClick={() => onNavigate('home')} className="flex flex-col leading-none text-left">
               <span className="text-[#0f172a] text-2xl md:text-3xl font-black tracking-tight uppercase">Toysin<span className="text-[#dc2626]">Bulk</span></span>
-              <span className="text-[10px] tracking-widest text-gray-500 uppercase font-semibold">{settings?.company_tagline || "America's Wholesale Distributor"}</span>
+              <span className="text-[10px] tracking-widest text-gray-500 uppercase font-semibold">{SITE_SETTINGS.company_tagline}</span>
             </button>
           </div>
 
@@ -103,10 +96,10 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onCartClick, cartCou
                 BROWSE DEPARTMENTS
               </div>
 
-              {megaMenu && megaMenu.length > 0 && (
+              {MEGA_MENU_ITEMS.length > 0 && (
               <div className={`absolute top-full left-0 pt-0 w-[1000px] transition-all duration-200 ${isMegaMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
                   <div className="bg-white text-gray-800 shadow-2xl grid grid-cols-4 border-t-4 border-[#dc2626]">
-                    {megaMenu.map((section) => (
+                    {MEGA_MENU_ITEMS.map((section) => (
                         <div key={section.id} className="p-6 border-r border-gray-100 last:border-0 bg-white flex flex-col h-full">
                             <h3 className="font-bold text-[#0f172a] text-sm uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">{section.category}</h3>
                             <ul className="space-y-3 mb-6 flex-1">
@@ -140,7 +133,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onCartClick, cartCou
             </div>
 
             <div className="flex items-center gap-8 overflow-x-auto scrollbar-hide w-full">
-            {(navItems || []).map((item) => (
+            {NAV_ITEMS.map((item) => (
                 <button
                 key={item.id}
                 onClick={() => onNavigate('collection', item.slug)}

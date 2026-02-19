@@ -1,35 +1,12 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import { useSupabaseData } from '../hooks/useSupabaseData';
-import { fetchBrands } from '../services/dataService';
+import { BRANDS } from '../data/staticData';
 
 interface BrandGridProps {
   onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
 }
 
 export const BrandGrid: React.FC<BrandGridProps> = ({ onNavigate }) => {
-  const { data: brands, loading, error } = useSupabaseData(() => fetchBrands(), []);
-
-  if (loading) {
-    return (
-      <div className="bg-white py-24 border-b border-gray-200">
-        <div className="max-w-[1440px] mx-auto px-4 md:px-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-64 mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded w-96 mb-12"></div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-6">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="aspect-square bg-gray-200 rounded-xl"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !brands || brands.length === 0) return null;
-
   return (
     <div className="bg-white py-24 border-b border-gray-200" id="brands">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8">
@@ -44,7 +21,7 @@ export const BrandGrid: React.FC<BrandGridProps> = ({ onNavigate }) => {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-6">
-          {brands.map((brand) => (
+          {BRANDS.map((brand) => (
             <button
               key={brand.id}
               onClick={() => onNavigate('collection')}

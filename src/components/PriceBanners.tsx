@@ -1,40 +1,14 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import { useSupabaseData } from '../hooks/useSupabaseData';
-import { fetchBanners } from '../services/dataService';
+import { PRICE_BANNERS } from '../data/staticData';
 
 interface PriceBannersProps {
     onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
 }
 
-const defaultBanners = [
-    { id: 'p1', title: 'Under $1', subtitle: 'Dollar Store Items', description: '', imageUrl: '', ctaText: '', ctaLink: '', bannerType: 'promo' as const },
-    { id: 'p5', title: 'Under $5', subtitle: 'Bin Fillers & Gifts', description: '', imageUrl: '', ctaText: '', ctaLink: '', bannerType: 'promo' as const },
-    { id: 'p10', title: 'Under $10', subtitle: 'Premium Toys', description: '', imageUrl: '', ctaText: '', ctaLink: '', bannerType: 'promo' as const },
-    { id: 'pbulk', title: 'BULK', subtitle: 'Case Pack Savings', description: '', imageUrl: '', ctaText: '', ctaLink: '', bannerType: 'promo' as const },
-];
-
 const colors = ['bg-blue-900', 'bg-blue-800', 'bg-blue-700', 'bg-[#dc2626]'];
 
 export const PriceBanners: React.FC<PriceBannersProps> = ({ onNavigate }) => {
-  const { data: banners, loading } = useSupabaseData(() => fetchBanners('promo'), []);
-  const items = banners && banners.length > 0 ? banners : defaultBanners;
-
-  if (loading) {
-    return (
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-16">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-48 mb-8"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-48 bg-gray-200 rounded-lg"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-16">
       <div className="flex items-center justify-between mb-8">
@@ -43,8 +17,8 @@ export const PriceBanners: React.FC<PriceBannersProps> = ({ onNavigate }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {items.map((item, idx) => {
-            const isSpecial = idx === items.length - 1;
+        {PRICE_BANNERS.map((item, idx) => {
+            const isSpecial = idx === PRICE_BANNERS.length - 1;
             const color = colors[idx % colors.length];
 
             return (
