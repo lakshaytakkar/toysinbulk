@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { MAIN_PRODUCT, RELATED_PRODUCTS } from '../constants';
 import { Star, ShoppingCart, Heart, Share2, Printer, Mail, ChevronRight, ChevronDown, Package, Clock, Truck, ShieldCheck } from 'lucide-react';
+import { useSupabaseData } from '../hooks/useSupabaseData';
+import { fetchProducts, fetchRelatedProducts } from '../services/dataService';
 
 interface ProductPageProps {
   onNavigate: (view: 'home' | 'collection' | 'product') => void;
@@ -10,13 +11,29 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
-  const product = MAIN_PRODUCT;
-  const thumbnails = [
-    product.image,
-    'https://s7.orientaltrading.com/is/image/OrientalTrading/13780504_a?$PDP_VIEWER_IMAGE$',
-    'https://s7.orientaltrading.com/is/image/OrientalTrading/13780504_b?$PDP_VIEWER_IMAGE$',
-    'https://s7.orientaltrading.com/is/image/OrientalTrading/13780504_c?$PDP_VIEWER_IMAGE$'
-  ];
+  const { data: productData } = useSupabaseData(() => fetchProducts({ limit: 1 }), []);
+  const product = productData?.products?.[0];
+
+  const { data: relatedData } = useSupabaseData(
+    () => product ? fetchRelatedProducts(product.id, product.categoryId, 4) : Promise.resolve([]),
+    [product?.id]
+  );
+  const relatedProducts = relatedData || [];
+
+  if (!product) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-center">
+          <div className="h-8 bg-gray-200 rounded w-64 mx-auto mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-48 mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  const thumbnails = product.images && product.images.length > 0
+    ? product.images.map(img => img.imageUrl)
+    : [product.image];
 
   return (
     <div className="bg-white min-h-screen font-sans text-[#0f172a]">
@@ -28,8 +45,8 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
         <nav className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-8 flex items-center gap-2">
             <button onClick={() => onNavigate('home')} className="hover:text-[#0b668d]">Home</button> <ChevronRight size={10}/>
             <button onClick={() => onNavigate('collection')} className="hover:text-[#0b668d]">Toys, Games & Novelties</button> <ChevronRight size={10}/>
-            <button onClick={() => onNavigate('collection')} className="hover:text-[#0b668d]">Novelty Toys</button> <ChevronRight size={10}/>
-            <span className="text-gray-600">Plush Toys</span>
+            <button onClick={() => onNavigate('collection')} className="hover:text-[#0b668d]">{product.categoryName || 'Plush Toys'}</button> <ChevronRight size={10}/>
+            <span className="text-gray-600">{product.name.substring(0, 30)}...</span>
         </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16">
@@ -46,9 +63,9 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
               ))}
             </div>
             <div className="order-1 md:order-2 flex-1 relative bg-white border border-gray-100 rounded-lg p-10 flex items-center justify-center group">
-               <img src={thumbnails[selectedImage]} alt={product.name} className="max-w-full max-h-[500px] object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105" />
+               <img src={thumbnails[selectedImage] || product.image} alt={product.name} className="max-w-full max-h-[500px] object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105" />
                <div className="absolute top-4 right-4 bg-white/80 p-2 rounded shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                 <span className="text-[10px] font-bold text-gray-400">ITEM: {product.id}</span>
+                 <span className="text-[10px] font-bold text-gray-400">SKU: {product.sku || product.id}</span>
                </div>
             </div>
           </div>
@@ -79,16 +96,22 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
             </div>
 
             <div className="flex items-start gap-6 mb-8">
+               {product.badge === 'FLOS_DEAL' && (
                <div className="w-14 h-14 rounded-full bg-[#bf2d78] text-white flex flex-col items-center justify-center leading-none shadow-sm">
                  <span className="text-[10px] font-black uppercase tracking-tighter">Flo's</span>
                  <span className="text-[12px] font-black uppercase tracking-tighter">Deal</span>
                </div>
+               )}
                <div className="flex flex-col">
                   <div className="flex items-baseline gap-2">
                     <span className="text-4xl font-black text-[#cc2b1e] tracking-tighter">${product.price.toFixed(2).split('.')[0]}.<span className="text-xl">{product.price.toFixed(2).split('.')[1]}</span></span>
-                    <span className="text-sm text-gray-400 font-bold uppercase">was ${product.originalPrice}</span>
+                    {product.originalPrice && (
+                      <span className="text-sm text-gray-400 font-bold uppercase">was ${product.originalPrice.toFixed(2)}</span>
+                    )}
                   </div>
-                  <span className="text-xs text-[#cc2b1e] font-bold uppercase">46% OFF</span>
+                  {product.originalPrice && (
+                    <span className="text-xs text-[#cc2b1e] font-bold uppercase">{Math.round((1 - product.price / product.originalPrice) * 100)}% OFF</span>
+                  )}
                </div>
             </div>
 
@@ -116,8 +139,8 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
 
             <div className="space-y-2">
                {[
-                 { title: 'Product Details', content: product.description, isOpen: true },
-                 { title: 'Specifications', content: Object.entries(product.specifications || {}).map(([k,v]) => `${k}: ${v}`).join('\n') },
+                 { title: 'Product Details', content: product.description || '', isOpen: true },
+                 { title: 'Specifications', content: product.specifications ? Object.entries(product.specifications).map(([k,v]) => `${k}: ${v}`).join('\n') : '' },
                  { title: 'Shipping & Returns', content: 'Free standard shipping on orders over $250. 110% Price match guarantee.' }
                ].map((section, idx) => (
                  <div key={idx} className="border-b border-gray-100">
@@ -161,6 +184,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
            </div>
         </div>
 
+        {relatedProducts.length > 0 && (
         <div className="mb-16">
            <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-[#0f172a]">
               <h2 className="text-xl font-black uppercase tracking-widest">Customers Also Bought</h2>
@@ -170,7 +194,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
               </div>
            </div>
            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {RELATED_PRODUCTS.map((p) => (
+              {relatedProducts.map((p) => (
                 <div key={p.id} className="group cursor-pointer" onClick={() => onNavigate('product')}>
                    <div className="aspect-square bg-white border border-gray-100 rounded p-4 mb-4 relative overflow-hidden group-hover:shadow-md transition-all">
                       <img src={p.image} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform" />
@@ -186,6 +210,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
               ))}
            </div>
         </div>
+        )}
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-12 border-y border-gray-100 bg-gray-50 -mx-4 md:-mx-8 px-8">
             <div className="flex items-center gap-4">

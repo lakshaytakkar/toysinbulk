@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { COLLECTION_PRODUCTS } from '../constants';
 import { ChevronDown, X, ShoppingCart, Truck, LayoutGrid, List, ChevronRight } from 'lucide-react';
+import { useSupabaseData } from '../hooks/useSupabaseData';
+import { fetchProducts } from '../services/dataService';
 
 interface CollectionPageProps {
   onNavigate: (view: 'home' | 'collection' | 'product') => void;
@@ -9,6 +10,10 @@ interface CollectionPageProps {
 export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate }) => {
   const [showOutOfStock, setShowOutOfStock] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'quick-stock'>('grid');
+
+  const { data, loading } = useSupabaseData(() => fetchProducts({ limit: 20 }), []);
+  const products = data?.products || [];
+  const total = data?.total || 0;
 
   return (
     <div className="bg-white min-h-screen">
@@ -90,7 +95,7 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate }) =>
                   <h1 className="text-2xl md:text-3xl font-black text-[#0f172a] leading-tight tracking-tight uppercase">
                     Christmas Stuffed Animals & Plush Toys in Bulk
                   </h1>
-                  <p className="text-sm text-gray-400 mt-2 font-medium">(149 items)</p>
+                  <p className="text-sm text-gray-400 mt-2 font-medium">({total} items)</p>
                 </div>
 
                 <div className="flex items-center gap-6">
@@ -124,9 +129,19 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate }) =>
               </div>
             </div>
 
-            {viewMode === 'grid' ? (
+            {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {COLLECTION_PRODUCTS.map((product) => (
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="aspect-square bg-gray-200 rounded-lg mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  </div>
+                ))}
+              </div>
+            ) : viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {products.map((product) => (
                     <div key={product.id} className="flex flex-col group h-full bg-white border border-transparent hover:border-gray-100 hover:shadow-xl transition-all p-4 rounded-xl cursor-pointer" onClick={() => onNavigate('product')}>
                       <div className="aspect-square bg-white relative overflow-hidden mb-4 flex items-center justify-center">
                         <img
@@ -153,7 +168,9 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate }) =>
                            )}
                            <div className="flex flex-col">
                               <span className="text-lg font-black text-[#cc2b1e] tracking-tighter">${product.price.toFixed(2)}</span>
-                              <span className="text-[10px] text-gray-400 font-bold uppercase">was ${product.originalPrice}</span>
+                              {product.originalPrice && (
+                                <span className="text-[10px] text-gray-400 font-bold uppercase">was ${product.originalPrice.toFixed(2)}</span>
+                              )}
                            </div>
                         </div>
 
@@ -177,7 +194,7 @@ export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate }) =>
                       </tr>
                    </thead>
                    <tbody>
-                      {COLLECTION_PRODUCTS.map((p) => (
+                      {products.map((p) => (
                         <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => onNavigate('product')}>
                            <td className="px-6 py-4">
                               <div className="flex items-center gap-4">

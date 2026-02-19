@@ -1,12 +1,16 @@
 import React from 'react';
-import { PRODUCTS } from '../constants';
 import { ShoppingCart, Package } from 'lucide-react';
+import { useSupabaseData } from '../hooks/useSupabaseData';
+import { fetchProducts } from '../services/dataService';
 
 interface ProductCarouselProps {
   onNavigate: (view: 'home' | 'collection' | 'product') => void;
 }
 
 export const ProductCarousel: React.FC<ProductCarouselProps> = ({ onNavigate }) => {
+  const { data } = useSupabaseData(() => fetchProducts({ featured: true, limit: 5 }), []);
+  const products = data?.products || [];
+
   return (
     <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-16 border-b border-gray-200" id="deals">
       <div className="flex justify-between items-end mb-10">
@@ -23,7 +27,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({ onNavigate }) 
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-        {PRODUCTS.map((product) => {
+        {products.map((product) => {
             const unitPrice = (product.price / (product.caseQuantity || 1)).toFixed(2);
 
             return (
@@ -59,7 +63,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({ onNavigate }) 
                         <div className="bg-gray-50 p-3 rounded-lg mb-4">
                             <div className="flex justify-between items-baseline">
                                 <span className="text-[10px] text-gray-500 font-bold uppercase">Case Price</span>
-                                <span className="text-xl font-black text-[#0f172a]">${product.price}</span>
+                                <span className="text-xl font-black text-[#0f172a]">${product.price.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between items-center mt-1 pt-1 border-t border-gray-200/50">
                                 <span className="text-[10px] text-[#dc2626] font-bold uppercase">Cost / Unit</span>

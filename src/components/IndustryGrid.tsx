@@ -1,12 +1,38 @@
 import React from 'react';
-import { INDUSTRIES } from '../constants';
 import { ArrowRight } from 'lucide-react';
+import { useSupabaseData } from '../hooks/useSupabaseData';
+import { fetchIndustries } from '../services/dataService';
 
 interface IndustryGridProps {
   onNavigate: (view: 'home' | 'collection' | 'product') => void;
 }
 
 export const IndustryGrid: React.FC<IndustryGridProps> = ({ onNavigate }) => {
+  const { data: industries, loading, error } = useSupabaseData(() => fetchIndustries(), []);
+
+  if (loading) {
+    return (
+      <div className="bg-white py-24">
+        <div className="max-w-[1440px] mx-auto px-4 md:px-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-48 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-96 mb-16"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i}>
+                  <div className="h-64 bg-gray-200 rounded-xl mb-6"></div>
+                  <div className="h-4 bg-gray-200 rounded w-32"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !industries || industries.length === 0) return null;
+
   return (
     <div className="bg-white py-24" id="industries">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8">
@@ -16,7 +42,7 @@ export const IndustryGrid: React.FC<IndustryGridProps> = ({ onNavigate }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {INDUSTRIES.map((industry) => (
+          {industries.map((industry) => (
             <div key={industry.id} className="group cursor-pointer" onClick={() => onNavigate('collection')}>
               <div className="relative h-64 rounded-xl overflow-hidden mb-6 border border-gray-200">
                 <img

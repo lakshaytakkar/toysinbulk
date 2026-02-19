@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Search, ShoppingCart, Phone, User, Menu, ChevronDown, Package } from 'lucide-react';
-import { NAV_ITEMS, MEGA_MENU_ITEMS } from '../constants';
+import { Search, ShoppingCart, Phone, Menu, ChevronDown, Package } from 'lucide-react';
+import { useSupabaseData } from '../hooks/useSupabaseData';
+import { fetchNavItems, fetchMegaMenuItems, fetchSiteSettings } from '../services/dataService';
 
 interface HeaderProps {
   onNavigate: (view: 'home' | 'collection' | 'product') => void;
@@ -8,6 +9,12 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+  const { data: navItems } = useSupabaseData(() => fetchNavItems(), []);
+  const { data: megaMenu } = useSupabaseData(() => fetchMegaMenuItems(), []);
+  const { data: settings } = useSupabaseData(() => fetchSiteSettings(), []);
+
+  const phone = settings?.phone_number || '1-888-TOYS-BULK';
+  const promoText = settings?.promo_bar_text || 'Free Shipping on Wholesale Orders Over $250';
 
   return (
     <header className="flex flex-col w-full relative z-50 font-sans">
@@ -18,12 +25,12 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
                  USA Owned & Operated
             </span>
             <span className="text-gray-400">|</span>
-            <span>Free Shipping on Wholesale Orders Over $250</span>
+            <span>{promoText}</span>
         </div>
         <div className="flex items-center gap-6">
             <button onClick={() => onNavigate('home')} className="hover:text-gray-300 transition-colors">Business Accounts</button>
             <span className="text-gray-400">|</span>
-            <span className="flex items-center gap-2"><Phone size={12}/> 1-888-TOYS-BULK</span>
+            <span className="flex items-center gap-2"><Phone size={12}/> {phone}</span>
         </div>
       </div>
 
@@ -35,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
             </button>
             <button onClick={() => onNavigate('home')} className="flex flex-col leading-none text-left">
               <span className="text-[#0f172a] text-2xl md:text-3xl font-black tracking-tight uppercase">Toysin<span className="text-[#dc2626]">Bulk</span></span>
-              <span className="text-[10px] tracking-widest text-gray-500 uppercase font-semibold">America's Wholesale Distributor</span>
+              <span className="text-[10px] tracking-widest text-gray-500 uppercase font-semibold">{settings?.company_tagline || "America's Wholesale Distributor"}</span>
             </button>
           </div>
 
@@ -58,13 +65,6 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
             <button onClick={() => onNavigate('home')} className="hidden md:flex flex-col items-center group text-gray-600 hover:text-[#0f172a]">
                 <Package className="w-6 h-6 mb-1 group-hover:scale-105 transition-transform" />
                 <span className="text-[11px] font-semibold uppercase">Orders</span>
-            </button>
-
-            <button className="flex flex-col items-center group text-gray-600 hover:text-[#0f172a]">
-              <User className="w-6 h-6 mb-1 group-hover:scale-105 transition-transform" />
-              <div className="flex flex-col items-center leading-none">
-                  <span className="text-[11px] font-semibold uppercase">Sign In</span>
-              </div>
             </button>
 
             <button className="flex flex-col items-center group text-gray-600 hover:text-[#0f172a] relative">
@@ -101,10 +101,11 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
                 BROWSE DEPARTMENTS
               </div>
 
+              {megaMenu && megaMenu.length > 0 && (
               <div className={`absolute top-full left-0 pt-0 w-[1000px] transition-all duration-200 ${isMegaMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}>
                   <div className="bg-white text-gray-800 shadow-2xl grid grid-cols-4 border-t-4 border-[#dc2626]">
-                    {MEGA_MENU_ITEMS.map((section, idx) => (
-                        <div key={idx} className="p-6 border-r border-gray-100 last:border-0 bg-white flex flex-col h-full">
+                    {megaMenu.map((section) => (
+                        <div key={section.id} className="p-6 border-r border-gray-100 last:border-0 bg-white flex flex-col h-full">
                             <h3 className="font-bold text-[#0f172a] text-sm uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">{section.category}</h3>
                             <ul className="space-y-3 mb-6 flex-1">
                                 {section.items.map((item, i) => (
@@ -113,6 +114,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
                                     </li>
                                 ))}
                             </ul>
+                            {section.image && (
                             <div className="mt-auto group/img cursor-pointer relative overflow-hidden rounded-md h-32" onClick={() => onNavigate('collection')}>
                                 <img src={section.image} alt={section.category} className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
@@ -120,6 +122,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
                                     <span className="text-white text-xs font-bold leading-tight">{section.featuredText}</span>
                                 </div>
                             </div>
+                            )}
                         </div>
                     ))}
                     <div className="col-span-4 bg-gray-50 p-4 border-t border-gray-200 flex justify-between items-center">
@@ -131,12 +134,13 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
                     </div>
                   </div>
               </div>
+              )}
             </div>
 
             <div className="flex items-center gap-8 overflow-x-auto scrollbar-hide w-full">
-            {NAV_ITEMS.map((item, idx) => (
+            {(navItems || []).map((item) => (
                 <button
-                key={idx}
+                key={item.id}
                 onClick={() => onNavigate('collection')}
                 className={`text-sm font-medium whitespace-nowrap transition-colors hover:text-gray-300 ${item.isRed ? 'text-[#fca5a5]' : 'text-gray-100'}`}
                 >
