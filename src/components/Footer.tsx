@@ -1,8 +1,8 @@
 import React from 'react';
-import { Mail, ShieldCheck, Truck, CreditCard, Phone } from 'lucide-react';
+import { Mail, ShieldCheck, Truck, CreditCard, Phone, MapPin } from 'lucide-react';
 
 interface FooterProps {
-  onNavigate: (view: 'home' | 'collection' | 'product') => void;
+  onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
@@ -44,15 +44,35 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
       </div>
 
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12 text-sm">
-            <div className="col-span-1 md:col-span-1">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-12 text-sm">
+            <div className="col-span-1 md:col-span-2">
                  <h4 className="font-bold text-[#0f172a] text-lg mb-6 uppercase tracking-wider">ToysinBulk</h4>
                  <p className="mb-6 leading-relaxed">
                     America's leading wholesale distributor of toys, party supplies, and novelties. Serving businesses and organizations since 1998.
                  </p>
-                 <div className="flex items-center gap-2 text-[#0f172a] font-bold">
+                 <div className="flex items-center gap-2 text-[#0f172a] font-bold mb-6">
                     <img src="https://flagcdn.com/w40/us.png" alt="USA" className="w-6" />
-                    Proudly US Owned
+                    Proudly US Owned & Operated
+                 </div>
+
+                 <div className="space-y-4 text-sm">
+                    <h5 className="font-bold text-[#0f172a] text-xs uppercase tracking-widest">Our Locations</h5>
+                    <div className="flex items-start gap-2">
+                       <MapPin size={16} className="text-[#dc2626] mt-0.5 shrink-0" />
+                       <div>
+                         <p className="font-bold text-[#0f172a]">Headquarters & Warehouse</p>
+                         <p>4201 Congress St, Suite 175</p>
+                         <p>Charlotte, NC 28209</p>
+                       </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                       <MapPin size={16} className="text-[#dc2626] mt-0.5 shrink-0" />
+                       <div>
+                         <p className="font-bold text-[#0f172a]">Distribution Center</p>
+                         <p>1820 J.N. Pease Pl</p>
+                         <p>Fayetteville, NC 28306</p>
+                       </div>
+                    </div>
                  </div>
             </div>
 

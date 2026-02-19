@@ -4,7 +4,7 @@ import { useSupabaseData } from '../hooks/useSupabaseData';
 import { fetchBanners } from '../services/dataService';
 
 interface HeroProps {
-  onNavigate: (view: 'home' | 'collection' | 'product') => void;
+  onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
@@ -16,13 +16,13 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       <div className="max-w-[1440px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 min-h-[500px]">
 
-            <div className="md:col-span-5 bg-white flex flex-col justify-center p-8 md:p-16 lg:p-20 z-10">
+            <div className="md:col-span-5 bg-white flex flex-col justify-center p-8 md:p-12 lg:p-16 z-10">
                 <div className="inline-flex items-center gap-2 mb-6">
                      <span className="bg-[#0f172a] text-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest rounded-sm">{banner?.subtitle || 'Wholesale Only'}</span>
                      <span className="text-xs text-gray-500 font-semibold tracking-wide uppercase">Est. 1998</span>
                 </div>
 
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#0f172a] leading-[1.1] mb-6">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#0f172a] leading-[1.1] mb-6">
                     {banner?.title ? (
                       <>
                         {banner.title.split(' ').slice(0, 2).join(' ')} <br/>
@@ -33,7 +33,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                     )}
                 </h1>
 
-                <p className="text-gray-600 text-lg mb-8 leading-relaxed max-w-md">
+                <p className="text-gray-600 text-base md:text-lg mb-8 leading-relaxed max-w-md">
                     {banner?.description || "Direct-to-business pricing on over 10,000 SKUs. We supply schools, non-profits, and retailers across the USA."}
                 </p>
 
@@ -46,7 +46,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                     </button>
                 </div>
 
-                <div className="mt-12 flex items-center gap-8 text-sm font-semibold text-gray-500">
+                <div className="mt-10 flex items-center gap-8 text-sm font-semibold text-gray-500">
                      <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         In Stock Ready to Ship

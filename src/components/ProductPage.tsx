@@ -1,24 +1,42 @@
 import React, { useState } from 'react';
-import { Star, ShoppingCart, Heart, Share2, Printer, Mail, ChevronRight, ChevronDown, Package, Clock, Truck, ShieldCheck } from 'lucide-react';
+import { Star, ShoppingCart, Heart, Share2, Printer, Mail, ChevronRight, ChevronDown, Package, Truck, ShieldCheck } from 'lucide-react';
 import { useSupabaseData } from '../hooks/useSupabaseData';
-import { fetchProducts, fetchRelatedProducts } from '../services/dataService';
+import { fetchProductBySlug, fetchProducts, fetchRelatedProducts } from '../services/dataService';
+import { useCart } from '../context/CartContext';
+import type { Product } from '../types';
 
 interface ProductPageProps {
-  onNavigate: (view: 'home' | 'collection' | 'product') => void;
+  onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
+  productSlug?: string;
 }
 
-export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
+export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate, productSlug }) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const { addToCart } = useCart();
 
-  const { data: productData } = useSupabaseData(() => fetchProducts({ limit: 1 }), []);
-  const product = productData?.products?.[0];
+  const { data: product } = useSupabaseData(
+    () => productSlug ? fetchProductBySlug(productSlug) : fetchProducts({ limit: 1 }).then(d => d.products[0] || null),
+    [productSlug]
+  );
 
   const { data: relatedData } = useSupabaseData(
     () => product ? fetchRelatedProducts(product.id, product.categoryId, 4) : Promise.resolve([]),
     [product?.id]
   );
   const relatedProducts = relatedData || [];
+
+  const handleAddToCart = (product: Product, qty: number) => {
+    addToCart(product, qty);
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 2000);
+  };
+
+  const handleRelatedAddToCart = (e: React.MouseEvent, p: Product) => {
+    e.stopPropagation();
+    addToCart(p);
+  };
 
   if (!product) {
     return (
@@ -37,10 +55,6 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="bg-white min-h-screen font-sans text-[#0f172a]">
-      <div className="bg-[#cc2b1e] text-white py-2 text-center text-xs font-black uppercase tracking-[0.2em]">
-        Limited Time! FREE SHIPPING ON ORDERS $25+ <button className="bg-white text-[#cc2b1e] px-3 py-1 ml-2 rounded-sm hover:opacity-90">Click to Apply</button>
-      </div>
-
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-8">
         <nav className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-8 flex items-center gap-2">
             <button onClick={() => onNavigate('home')} className="hover:text-[#0b668d]">Home</button> <ChevronRight size={10}/>
@@ -62,11 +76,8 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
                 </button>
               ))}
             </div>
-            <div className="order-1 md:order-2 flex-1 relative bg-white border border-gray-100 rounded-lg p-10 flex items-center justify-center group">
-               <img src={thumbnails[selectedImage] || product.image} alt={product.name} className="max-w-full max-h-[500px] object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105" />
-               <div className="absolute top-4 right-4 bg-white/80 p-2 rounded shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                 <span className="text-[10px] font-bold text-gray-400">SKU: {product.sku || product.id}</span>
-               </div>
+            <div className="order-1 md:order-2 flex-1 relative bg-white border border-gray-100 rounded-lg p-10 flex items-center justify-center">
+               <img src={thumbnails[selectedImage] || product.image} alt={product.name} className="max-w-full max-h-[500px] object-contain mix-blend-multiply" />
             </div>
           </div>
 
@@ -80,19 +91,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
                  {[...Array(5)].map((_, i) => (
                    <Star key={i} size={16} className={i < Math.floor(product.rating) ? "fill-[#f4a100] text-[#f4a100]" : "text-gray-200"} />
                  ))}
-                 <span className="text-xs text-[#0b668d] font-bold hover:underline cursor-pointer ml-1">{product.reviews} Reviews</span>
+                 <span className="text-xs text-[#0b668d] font-bold ml-1">{product.reviews} Reviews</span>
                </div>
                <span className="text-gray-300">|</span>
-               <span className="text-xs text-[#0b668d] font-bold hover:underline cursor-pointer">2 Questions</span>
-            </div>
-
-            <div className="bg-[#fff9f9] border border-[#ffefef] p-4 rounded-md mb-8 flex items-center gap-4">
-               <Clock size={20} className="text-[#cc2b1e]" />
-               <div>
-                  <p className="text-sm font-bold text-[#0f172a]">Need it by Christmas?</p>
-                  <p className="text-xs text-[#cc2b1e]">Order by Noon, CT on Thurs. Dec. 18th, with Standard Shipping</p>
-               </div>
-               <button className="text-[10px] font-black text-[#0b668d] uppercase ml-auto hover:underline">See Options</button>
+               <span className="text-xs text-gray-500 font-bold">SKU: {product.sku || product.id.slice(0, 8)}</span>
             </div>
 
             <div className="flex items-start gap-6 mb-8">
@@ -121,8 +123,11 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
                   <input type="number" value={quantity} readOnly className="w-16 text-center text-sm font-bold focus:outline-none" />
                   <button onClick={() => setQuantity(quantity + 1)} className="bg-gray-50 px-4 hover:bg-gray-100 transition-colors border-l border-gray-300">+</button>
                </div>
-               <button className="flex-1 bg-[#d8451c] hover:bg-[#b53a18] text-white py-4 rounded font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-colors shadow-lg">
-                  <ShoppingCart size={20} /> Add to Cart
+               <button
+                 onClick={() => handleAddToCart(product, quantity)}
+                 className={`flex-1 py-4 rounded font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-colors shadow-lg ${addedToCart ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-[#d8451c] hover:bg-[#b53a18] text-white'}`}
+               >
+                  <ShoppingCart size={20} /> {addedToCart ? 'Added to Cart!' : 'Add to Cart'}
                </button>
             </div>
 
@@ -188,23 +193,19 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
         <div className="mb-16">
            <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-[#0f172a]">
               <h2 className="text-xl font-black uppercase tracking-widest">Customers Also Bought</h2>
-              <div className="flex gap-2">
-                <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"> <ChevronRight size={16} className="rotate-180"/> </button>
-                <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"> <ChevronRight size={16}/> </button>
-              </div>
            </div>
            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
               {relatedProducts.map((p) => (
-                <div key={p.id} className="group cursor-pointer" onClick={() => onNavigate('product')}>
-                   <div className="aspect-square bg-white border border-gray-100 rounded p-4 mb-4 relative overflow-hidden group-hover:shadow-md transition-all">
-                      <img src={p.image} alt={p.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform" />
+                <div key={p.id} className="cursor-pointer" onClick={() => onNavigate('product', p.slug)}>
+                   <div className="aspect-square bg-white border border-gray-100 rounded p-4 mb-4 relative overflow-hidden hover:shadow-md transition-all">
+                      <img src={p.image} alt={p.name} className="w-full h-full object-contain mix-blend-multiply" />
                       {p.badge === 'FLOS_DEAL' && <div className="absolute top-2 left-2 w-8 h-8 rounded-full bg-[#bf2d78] text-white flex flex-col items-center justify-center leading-none text-[6px] font-black uppercase"><span className="scale-[0.8]">Flo's</span><span className="scale-[0.8]">Deal</span></div>}
                       {p.badge === 'ON_SALE' && <div className="absolute top-2 left-2 bg-[#cc2b1e] text-white px-1 py-0.5 text-[6px] font-black uppercase leading-none rounded-sm">ON SALE</div>}
                    </div>
-                   <h4 className="text-[11px] font-bold text-[#0b668d] hover:underline mb-2 line-clamp-2 h-8">{p.name}</h4>
+                   <h4 className="text-[11px] font-bold text-[#0b668d] mb-2 line-clamp-2 h-8">{p.name}</h4>
                    <div className="flex items-center justify-between">
                       <span className="font-black text-sm text-[#cc2b1e]">${p.price.toFixed(2)}</span>
-                      <button className="bg-[#d8451c] text-white p-2 rounded hover:bg-[#b53a18] transition-colors"><ShoppingCart size={12}/></button>
+                      <button onClick={(e) => handleRelatedAddToCart(e, p)} className="bg-[#d8451c] text-white p-2 rounded hover:bg-[#b53a18] transition-colors"><ShoppingCart size={12}/></button>
                    </div>
                 </div>
               ))}
@@ -230,8 +231,8 @@ export const ProductPage: React.FC<ProductPageProps> = ({ onNavigate }) => {
             <div className="flex items-center gap-4">
                 <Package className="text-[#0f172a]" />
                 <div className="leading-tight">
-                    <p className="text-[10px] font-black uppercase">90+ Years</p>
-                    <p className="text-[9px] text-gray-500">US Owned in Omaha, NE</p>
+                    <p className="text-[10px] font-black uppercase">25+ Years</p>
+                    <p className="text-[9px] text-gray-500">US Owned in North Carolina</p>
                 </div>
             </div>
              <div className="flex items-center gap-4">

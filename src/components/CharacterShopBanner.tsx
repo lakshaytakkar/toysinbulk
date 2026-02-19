@@ -3,7 +3,7 @@ import { useSupabaseData } from '../hooks/useSupabaseData';
 import { fetchBanners } from '../services/dataService';
 
 interface CharacterShopBannerProps {
-  onNavigate: (view: 'home' | 'collection' | 'product') => void;
+  onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
 }
 
 export const CharacterShopBanner: React.FC<CharacterShopBannerProps> = ({ onNavigate }) => {

@@ -4,7 +4,7 @@ import { useSupabaseData } from '../hooks/useSupabaseData';
 import { fetchIndustries } from '../services/dataService';
 
 interface IndustryGridProps {
-  onNavigate: (view: 'home' | 'collection' | 'product') => void;
+  onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
 }
 
 export const IndustryGrid: React.FC<IndustryGridProps> = ({ onNavigate }) => {

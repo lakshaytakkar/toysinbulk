@@ -3,7 +3,7 @@ import { useSupabaseData } from '../hooks/useSupabaseData';
 import { fetchCategories } from '../services/dataService';
 
 interface CategoryGridProps {
-    onNavigate: (view: 'home' | 'collection' | 'product') => void;
+    onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
 }
 
 export const CategoryGrid: React.FC<CategoryGridProps> = ({ onNavigate }) => {
@@ -40,7 +40,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onNavigate }) => {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12">
             {categories.map((cat) => (
-                <div key={cat.id} className="group cursor-pointer" onClick={() => onNavigate('collection')}>
+                <div key={cat.id} className="group cursor-pointer" onClick={() => onNavigate('collection', cat.slug)}>
                     <div className="aspect-[4/3] bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200 mb-4 relative group-hover:border-[#dc2626]/30 group-hover:shadow-md transition-all duration-300">
                         <img
                             src={cat.image}

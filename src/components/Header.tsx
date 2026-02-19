@@ -4,10 +4,12 @@ import { useSupabaseData } from '../hooks/useSupabaseData';
 import { fetchNavItems, fetchMegaMenuItems, fetchSiteSettings } from '../services/dataService';
 
 interface HeaderProps {
-  onNavigate: (view: 'home' | 'collection' | 'product') => void;
+  onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
+  onCartClick: () => void;
+  cartCount: number;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
+export const Header: React.FC<HeaderProps> = ({ onNavigate, onCartClick, cartCount }) => {
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const { data: navItems } = useSupabaseData(() => fetchNavItems(), []);
   const { data: megaMenu } = useSupabaseData(() => fetchMegaMenuItems(), []);
@@ -63,14 +65,14 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
             <Search className="w-6 h-6 md:hidden text-gray-700" />
 
             <button onClick={() => onNavigate('home')} className="hidden md:flex flex-col items-center group text-gray-600 hover:text-[#0f172a]">
-                <Package className="w-6 h-6 mb-1 group-hover:scale-105 transition-transform" />
+                <Package className="w-6 h-6 mb-1" />
                 <span className="text-[11px] font-semibold uppercase">Orders</span>
             </button>
 
-            <button className="flex flex-col items-center group text-gray-600 hover:text-[#0f172a] relative">
-              <ShoppingCart className="w-6 h-6 mb-1 group-hover:scale-105 transition-transform" />
+            <button onClick={onCartClick} className="flex flex-col items-center group text-gray-600 hover:text-[#0f172a] relative">
+              <ShoppingCart className="w-6 h-6 mb-1" />
               <span className="text-[11px] font-semibold uppercase">Cart</span>
-              <span className="absolute -top-1 right-1 bg-[#dc2626] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+              <span className={`absolute -top-1 right-1 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center ${cartCount > 0 ? 'bg-[#dc2626]' : 'bg-gray-400'}`}>{cartCount}</span>
             </button>
           </div>
         </div>
@@ -110,13 +112,13 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
                             <ul className="space-y-3 mb-6 flex-1">
                                 {section.items.map((item, i) => (
                                     <li key={i}>
-                                        <button onClick={() => onNavigate('collection')} className="text-sm text-gray-600 hover:text-[#dc2626] hover:underline block transition-colors text-left">{item}</button>
+                                        <button onClick={() => onNavigate('collection', section.category.toLowerCase().replace(/\s+/g, '-'))} className="text-sm text-gray-600 hover:text-[#dc2626] hover:underline block transition-colors text-left">{item}</button>
                                     </li>
                                 ))}
                             </ul>
                             {section.image && (
-                            <div className="mt-auto group/img cursor-pointer relative overflow-hidden rounded-md h-32" onClick={() => onNavigate('collection')}>
-                                <img src={section.image} alt={section.category} className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500" />
+                            <div className="mt-auto cursor-pointer relative overflow-hidden rounded-md h-32" onClick={() => onNavigate('collection', section.category.toLowerCase().replace(/\s+/g, '-'))}>
+                                <img src={section.image} alt={section.category} className="w-full h-full object-cover" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-3">
                                     <span className="text-yellow-400 text-[10px] font-bold uppercase">{section.featuredHeader}</span>
                                     <span className="text-white text-xs font-bold leading-tight">{section.featuredText}</span>
@@ -141,7 +143,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
             {(navItems || []).map((item) => (
                 <button
                 key={item.id}
-                onClick={() => onNavigate('collection')}
+                onClick={() => onNavigate('collection', item.slug)}
                 className={`text-sm font-medium whitespace-nowrap transition-colors hover:text-gray-300 ${item.isRed ? 'text-[#fca5a5]' : 'text-gray-100'}`}
                 >
                 {item.label}

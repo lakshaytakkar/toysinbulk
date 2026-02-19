@@ -2,14 +2,22 @@ import React from 'react';
 import { ShoppingCart, Package } from 'lucide-react';
 import { useSupabaseData } from '../hooks/useSupabaseData';
 import { fetchProducts } from '../services/dataService';
+import { useCart } from '../context/CartContext';
+import type { Product } from '../types';
 
 interface ProductCarouselProps {
-  onNavigate: (view: 'home' | 'collection' | 'product') => void;
+  onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
 }
 
 export const ProductCarousel: React.FC<ProductCarouselProps> = ({ onNavigate }) => {
   const { data } = useSupabaseData(() => fetchProducts({ featured: true, limit: 5 }), []);
   const products = data?.products || [];
+  const { addToCart } = useCart();
+
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.stopPropagation();
+    addToCart(product);
+  };
 
   return (
     <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-16 border-b border-gray-200" id="deals">
@@ -31,7 +39,7 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({ onNavigate }) 
             const unitPrice = (product.price / (product.caseQuantity || 1)).toFixed(2);
 
             return (
-                <div key={product.id} onClick={() => onNavigate('product')} className="bg-white rounded-xl border border-gray-200 hover:border-[#dc2626]/40 hover:shadow-xl transition-all p-5 flex flex-col group relative overflow-hidden cursor-pointer">
+                <div key={product.id} onClick={() => onNavigate('product', product.slug)} className="bg-white rounded-xl border border-gray-200 hover:border-[#dc2626]/40 hover:shadow-xl transition-all p-5 flex flex-col group relative overflow-hidden cursor-pointer">
 
                     {product.badge && (
                     <span className="absolute top-4 left-4 bg-[#dc2626] text-white text-[10px] font-black px-3 py-1 uppercase tracking-wide z-10 rounded-sm">
@@ -71,7 +79,10 @@ export const ProductCarousel: React.FC<ProductCarouselProps> = ({ onNavigate }) 
                             </div>
                         </div>
 
-                        <button className="w-full bg-[#0f172a] text-white py-3 rounded-md text-xs font-black uppercase tracking-widest hover:bg-[#dc2626] transition-all flex items-center justify-center gap-2 shadow-sm">
+                        <button
+                          onClick={(e) => handleAddToCart(e, product)}
+                          className="w-full bg-[#0f172a] text-white py-3 rounded-md text-xs font-black uppercase tracking-widest hover:bg-[#dc2626] transition-all flex items-center justify-center gap-2 shadow-sm"
+                        >
                             <ShoppingCart size={14} /> Add to Order
                         </button>
                     </div>

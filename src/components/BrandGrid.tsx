@@ -4,7 +4,7 @@ import { useSupabaseData } from '../hooks/useSupabaseData';
 import { fetchBrands } from '../services/dataService';
 
 interface BrandGridProps {
-  onNavigate: (view: 'home' | 'collection' | 'product') => void;
+  onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
 }
 
 export const BrandGrid: React.FC<BrandGridProps> = ({ onNavigate }) => {
@@ -54,6 +54,17 @@ export const BrandGrid: React.FC<BrandGridProps> = ({ onNavigate }) => {
                 src={brand.logo}
                 alt={brand.name}
                 className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-500 transform group-hover:scale-110"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent && !parent.querySelector('.brand-fallback')) {
+                    const fallback = document.createElement('span');
+                    fallback.className = 'brand-fallback text-lg font-black text-gray-400 uppercase tracking-tight';
+                    fallback.textContent = brand.name;
+                    parent.appendChild(fallback);
+                  }
+                }}
               />
 
               <div className="absolute inset-x-0 bottom-2 text-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -61,21 +72,6 @@ export const BrandGrid: React.FC<BrandGridProps> = ({ onNavigate }) => {
               </div>
             </button>
           ))}
-        </div>
-
-        <div className="mt-16 bg-gray-50 rounded-2xl p-8 border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 shrink-0">
-                    <span className="text-[#dc2626] font-black text-xl">!</span>
-                </div>
-                <div>
-                    <h4 className="font-bold text-[#0f172a] text-lg">Looking for a specific license?</h4>
-                    <p className="text-sm text-gray-500">Our procurement team can source specific bulk characters or properties for your event.</p>
-                </div>
-            </div>
-            <button className="bg-[#0f172a] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#1e293b] transition-colors whitespace-nowrap">
-                Contact Procurement
-            </button>
         </div>
       </div>
     </div>

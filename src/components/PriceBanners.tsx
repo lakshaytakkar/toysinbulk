@@ -4,7 +4,7 @@ import { useSupabaseData } from '../hooks/useSupabaseData';
 import { fetchBanners } from '../services/dataService';
 
 interface PriceBannersProps {
-    onNavigate: (view: 'home' | 'collection' | 'product') => void;
+    onNavigate: (view: 'home' | 'collection' | 'product', slug?: string) => void;
 }
 
 const defaultBanners = [
