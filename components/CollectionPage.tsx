@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { COLLECTION_PRODUCTS } from '../constants';
-import { ChevronDown, X, Star, ShoppingCart, Search, Info, Package, Truck, LayoutGrid, List } from 'lucide-react';
+import { ChevronDown, X, ShoppingCart, Truck, LayoutGrid, List, ChevronRight } from 'lucide-react';
 
-export const CollectionPage: React.FC = () => {
+interface CollectionPageProps {
+  onNavigate: (view: 'home' | 'collection' | 'product') => void;
+}
+
+export const CollectionPage: React.FC<CollectionPageProps> = ({ onNavigate }) => {
   const [showOutOfStock, setShowOutOfStock] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'quick-stock'>('grid');
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Free Shipping Sticky Tab */}
       <div className="fixed bottom-0 left-0 z-50 p-4 hidden md:block">
         <div className="bg-[#0b668d] text-white px-4 py-2 rounded-t-lg shadow-lg flex items-center gap-2 cursor-pointer hover:bg-[#095475] transition-colors border-x border-t border-white/20">
           <Truck size={18} />
@@ -19,12 +22,10 @@ export const CollectionPage: React.FC = () => {
 
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-8">
         <div className="flex flex-col md:flex-row gap-10">
-          
-          {/* Sidebar Filters */}
+
           <aside className="w-full md:w-64 shrink-0 font-sans">
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Shop By</h2>
-            
-            {/* Active Filters */}
+
             <div className="bg-[#f2f7fa] p-4 border border-[#d6e3eb] rounded mb-6">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-[10px] font-black text-[#0f172a] uppercase tracking-wider">Active Filters:</span>
@@ -36,12 +37,11 @@ export const CollectionPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Out of Stock Toggle */}
             <div className="flex items-center justify-between pb-6 mb-6 border-b border-gray-100">
                <span className="text-sm font-bold text-[#0f172a]">Out of Stock</span>
                <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold text-gray-400">HIDE</span>
-                  <button 
+                  <button
                     onClick={() => setShowOutOfStock(!showOutOfStock)}
                     className={`w-10 h-5 rounded-full relative transition-colors ${showOutOfStock ? 'bg-[#0b668d]' : 'bg-gray-200'}`}
                   >
@@ -51,7 +51,6 @@ export const CollectionPage: React.FC = () => {
                </div>
             </div>
 
-            {/* Accordion Filters */}
             <div className="space-y-4">
               {[
                 { label: 'Special Offers', isOpen: true },
@@ -79,13 +78,11 @@ export const CollectionPage: React.FC = () => {
             </div>
           </aside>
 
-          {/* Product Listing Main Area */}
           <main className="flex-1">
-            {/* Header / Breadcrumbs */}
             <div className="mb-8">
-              <nav className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-4 flex gap-2">
-                <a href="/" className="hover:text-[#0b668d]">Home</a> / 
-                <a href="#toys" className="hover:text-[#0b668d]">Toys</a> /
+              <nav className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-4 flex gap-2 items-center">
+                <button onClick={() => onNavigate('home')} className="hover:text-[#0b668d]">Home</button> /
+                <button onClick={() => onNavigate('collection')} className="hover:text-[#0b668d]">Toys</button> /
                 <span className="text-gray-600">Christmas Plush</span>
               </nav>
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -96,16 +93,15 @@ export const CollectionPage: React.FC = () => {
                   <p className="text-sm text-gray-400 mt-2 font-medium">(149 items)</p>
                 </div>
 
-                {/* B2B Variation: Quick Switcher */}
                 <div className="flex items-center gap-6">
                    <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
-                      <button 
+                      <button
                         onClick={() => setViewMode('grid')}
                         className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white shadow-sm text-[#0b668d]' : 'text-gray-400 hover:text-gray-600'}`}
                       >
                          <LayoutGrid size={18}/>
                       </button>
-                      <button 
+                      <button
                         onClick={() => setViewMode('quick-stock')}
                         className={`p-2 rounded ${viewMode === 'quick-stock' ? 'bg-white shadow-sm text-[#0b668d]' : 'text-gray-400 hover:text-gray-600'}`}
                       >
@@ -128,28 +124,23 @@ export const CollectionPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Grid View */}
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                {COLLECTION_PRODUCTS.map((product) => {
-                  const offPercent = Math.round((1 - product.price / (product.originalPrice || 1)) * 100);
-                  
-                  return (
-                    <div key={product.id} className="flex flex-col group h-full bg-white border border-transparent hover:border-gray-100 hover:shadow-xl transition-all p-4 rounded-xl">
+                {COLLECTION_PRODUCTS.map((product) => (
+                    <div key={product.id} className="flex flex-col group h-full bg-white border border-transparent hover:border-gray-100 hover:shadow-xl transition-all p-4 rounded-xl cursor-pointer" onClick={() => onNavigate('product')}>
                       <div className="aspect-square bg-white relative overflow-hidden mb-4 flex items-center justify-center">
-                        <img 
-                          src={product.image} 
-                          alt={product.name} 
-                          className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500" 
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500"
                         />
-                        <div className="absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 z-10 group-hover:animate-shine" />
                       </div>
 
                       <div className="flex-1 flex flex-col">
                         <h3 className="text-sm font-bold text-[#0b668d] hover:underline cursor-pointer leading-snug mb-2 line-clamp-3">
                           {product.name}
                         </h3>
-                        
+
                         <div className="flex items-center gap-2 mb-4">
                            {product.badge === 'FLOS_DEAL' && (
                              <div className="w-8 h-8 rounded-full bg-[#bf2d78] text-white flex flex-col items-center justify-center leading-none">
@@ -171,11 +162,9 @@ export const CollectionPage: React.FC = () => {
                         </button>
                       </div>
                     </div>
-                  );
-                })}
+                ))}
               </div>
             ) : (
-              /* Quick Stock View Variation */
               <div className="border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
                 <table className="w-full text-left text-sm">
                    <thead className="bg-gray-50 border-b border-gray-200">
@@ -189,10 +178,10 @@ export const CollectionPage: React.FC = () => {
                    </thead>
                    <tbody>
                       {COLLECTION_PRODUCTS.map((p) => (
-                        <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => onNavigate('product')}>
                            <td className="px-6 py-4">
                               <div className="flex items-center gap-4">
-                                 <img src={p.image} className="w-12 h-12 object-contain mix-blend-multiply" />
+                                 <img src={p.image} alt={p.name} className="w-12 h-12 object-contain mix-blend-multiply" />
                                  <span className="font-bold text-[#0b668d] hover:underline cursor-pointer">{p.name}</span>
                               </div>
                            </td>
@@ -202,7 +191,7 @@ export const CollectionPage: React.FC = () => {
                               <span className="text-[10px] font-black uppercase text-green-600 bg-green-50 px-2 py-1 rounded">In Stock</span>
                            </td>
                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                 <input type="number" defaultValue={0} min={0} className="w-16 border border-gray-300 rounded px-2 py-1 focus:ring-1 focus:ring-[#0b668d] outline-none" />
                                 <button className="p-1.5 bg-[#d8451c] text-white rounded hover:bg-[#b53a18]"><ShoppingCart size={14}/></button>
                               </div>

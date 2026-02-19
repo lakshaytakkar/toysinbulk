@@ -1,16 +1,16 @@
 import { Product, Category, NavItem, MegaMenuItem, Brand, Industry } from './types';
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'Deals', href: '#deals', isRed: true },
-  { label: 'Christmas', href: '#christmas' },
-  { label: "New Year's Eve", href: '#nye' },
-  { label: 'Party Supplies', href: '#party' },
-  { label: 'Toys & Games', href: '#toys' },
-  { label: 'Crafts', href: '#crafts' },
-  { label: 'Teaching Supplies', href: '#teaching' },
-  { label: 'Faith', href: '#faith' },
-  { label: 'Candy & Snacks', href: '#candy' },
-  { label: 'Home & Decor', href: '#decor' },
+  { label: 'Deals', isRed: true },
+  { label: 'Christmas' },
+  { label: "New Year's Eve" },
+  { label: 'Party Supplies' },
+  { label: 'Toys & Games' },
+  { label: 'Crafts' },
+  { label: 'Teaching Supplies' },
+  { label: 'Faith' },
+  { label: 'Candy & Snacks' },
+  { label: 'Home & Decor' },
 ];
 
 export const MAIN_PRODUCT: Product = {
@@ -83,28 +83,28 @@ export const COLLECTION_PRODUCTS: Product[] = [
 ];
 
 export const CATEGORIES: Category[] = [
-  { id: '1', name: 'Seasonal Toys', image: 'https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&q=80&w=600' },
-  { id: '2', name: 'Bulk Candy', image: 'https://images.unsplash.com/photo-1582058928231-9a69725ef936?auto=format&fit=crop&q=80&w=600' },
-  { id: '3', name: 'Winter Decor', image: 'https://images.unsplash.com/photo-1544967082-d9d25d867d66?auto=format&fit=crop&q=80&w=600' },
-  { id: '4', name: 'Arts & Crafts', image: 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?auto=format&fit=crop&q=80&w=600' },
-  { id: '5', name: 'Party Supplies', image: 'https://images.unsplash.com/photo-1530103862676-de3c9da59af7?auto=format&fit=crop&q=80&w=600' },
-  { id: '6', name: 'Plush Toys', image: 'https://images.unsplash.com/photo-1555445054-01a2f6dc44bd?auto=format&fit=crop&q=80&w=600' },
-  { id: '7', name: 'Wrapped Candy', image: 'https://images.unsplash.com/photo-1600359756098-8bc52195bbf4?auto=format&fit=crop&q=80&w=600' },
-  { id: '8', name: 'Novelty Items', image: 'https://images.unsplash.com/photo-1535572290543-523a102fef81?auto=format&fit=crop&q=80&w=600' },
+  { id: '1', name: 'Seasonal Toys', image: '/images/category-seasonal-toys.png' },
+  { id: '2', name: 'Bulk Candy', image: '/images/category-bulk-candy.png' },
+  { id: '3', name: 'Winter Decor', image: '/images/category-winter-decor.png' },
+  { id: '4', name: 'Arts & Crafts', image: '/images/category-arts-crafts.png' },
+  { id: '5', name: 'Party Supplies', image: '/images/category-party-supplies.png' },
+  { id: '6', name: 'Plush Toys', image: '/images/category-plush-toys.png' },
+  { id: '7', name: 'Wrapped Candy', image: '/images/category-wrapped-candy.png' },
+  { id: '8', name: 'Novelty Items', image: '/images/category-novelty-items.png' },
 ];
 
 export const MEGA_MENU_ITEMS: MegaMenuItem[] = [
   {
     category: "Toys & Games",
     items: ["Bulk Action Figures", "Plush Assortments", "Building Block Sets", "Die-Cast Vehicles", "Board Games & Puzzles", "Fidget & Sensory Toys", "Outdoor Play Equipment", "Educational STEM Kits"],
-    image: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&q=80&w=800",
+    image: "/images/mega-toys-games.png",
     featuredHeader: "Trending Now",
     featuredText: "Sensory Play Collection"
   },
   {
     category: "Party Supplies",
     items: ["Latex Balloons (144/Gross)", "Bulk Tableware & Cutlery", "Themed Party Decorations", "Party Favors & Bin Items", "Gift Bags & Tissue", "Costumes & Accessories", "Bulk Candy & Snacks", "Glow Sticks & Necklaces"],
-    image: "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&q=80&w=800",
+    image: "/images/mega-party-supplies.png",
     featuredHeader: "Event Essentials",
     featuredText: "Biodegradable Balloon Packs"
   }
@@ -118,23 +118,23 @@ export const BRANDS: Brand[] = [
   { id: 'nintendo', name: 'Nintendo', logo: 'https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo.svg' },
   { id: 'marvel', name: 'Marvel', logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Marvel_Logo.svg' },
   { id: 'starwars', name: 'Star Wars', logo: 'https://upload.wikimedia.org/wikipedia/commons/6/6c/Star_Wars_Logo.svg' },
-  { id: 'pokemon', name: 'Pokémon', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/98/International_Pok%C3%A9mon_logo.svg' }
+  { id: 'pokemon', name: 'Pokemon', logo: 'https://upload.wikimedia.org/wikipedia/commons/9/98/International_Pok%C3%A9mon_logo.svg' }
 ];
 
 export const INDUSTRIES: Industry[] = [
-  { 
-    id: 'schools', 
-    name: 'Schools & Education', 
+  {
+    id: 'schools',
+    name: 'Schools & Education',
     description: 'Bulk classroom prizes, teaching aids, and student incentives.',
     icon: 'School',
-    image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=600'
+    image: '/images/industry-schools.png'
   },
-  { 
-    id: 'nonprofits', 
-    name: 'Non-Profits & Charities', 
+  {
+    id: 'nonprofits',
+    name: 'Non-Profits & Charities',
     description: 'Low-cost donation items, gift bags, and outreach supplies.',
     icon: 'Heart',
-    image: 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&q=80&w=600'
+    image: '/images/industry-nonprofits.png'
   }
 ];
 

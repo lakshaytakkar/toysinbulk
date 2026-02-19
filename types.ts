@@ -37,7 +37,6 @@ export interface Industry {
 
 export interface NavItem {
   label: string;
-  href: string;
   isRed?: boolean;
 }
 
@@ -47,11 +46,4 @@ export interface MegaMenuItem {
   image: string;
   featuredHeader?: string;
   featuredText?: string;
-}
-
-export interface GeneratorConfig {
-    id: string;
-    prompt: string;
-    referenceImage?: string;
-    aspectRatio: string;
 }

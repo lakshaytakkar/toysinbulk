@@ -1,8 +1,12 @@
 import React from 'react';
 import { PRODUCTS } from '../constants';
-import { ShoppingCart, Package, Info } from 'lucide-react';
+import { ShoppingCart, Package } from 'lucide-react';
 
-export const ProductCarousel: React.FC = () => {
+interface ProductCarouselProps {
+  onNavigate: (view: 'home' | 'collection' | 'product') => void;
+}
+
+export const ProductCarousel: React.FC<ProductCarouselProps> = ({ onNavigate }) => {
   return (
     <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-16 border-b border-gray-200" id="deals">
       <div className="flex justify-between items-end mb-10">
@@ -13,20 +17,17 @@ export const ProductCarousel: React.FC = () => {
             <h2 className="text-3xl font-extrabold text-[#0f172a] mb-2 tracking-tight">Weekly Wholesale Closeouts</h2>
             <p className="text-gray-500 font-medium">Bulk lots priced to move. Immediate shipping available.</p>
         </div>
-        <a href="#" className="border-2 border-[#0f172a] text-[#0f172a] px-8 py-3 rounded-md font-bold hover:bg-[#0f172a] hover:text-white transition-all">
+        <button onClick={() => onNavigate('collection')} className="border-2 border-[#0f172a] text-[#0f172a] px-8 py-3 rounded-md font-bold hover:bg-[#0f172a] hover:text-white transition-all">
             View Full Manifest
-        </a>
+        </button>
       </div>
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         {PRODUCTS.map((product) => {
             const unitPrice = (product.price / (product.caseQuantity || 1)).toFixed(2);
-            
+
             return (
-                <div key={product.id} className="bg-white rounded-xl border border-gray-200 hover:border-[#dc2626]/40 hover:shadow-xl transition-all p-5 flex flex-col group relative overflow-hidden">
-                    
-                    {/* Shine Effect */}
-                    <div className="absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-20 z-10 group-hover:animate-shine" />
+                <div key={product.id} onClick={() => onNavigate('product')} className="bg-white rounded-xl border border-gray-200 hover:border-[#dc2626]/40 hover:shadow-xl transition-all p-5 flex flex-col group relative overflow-hidden cursor-pointer">
 
                     {product.badge && (
                     <span className="absolute top-4 left-4 bg-[#dc2626] text-white text-[10px] font-black px-3 py-1 uppercase tracking-wide z-10 rounded-sm">
@@ -35,13 +36,10 @@ export const ProductCarousel: React.FC = () => {
                     )}
 
                     <div className="aspect-square mb-6 overflow-hidden bg-gray-50 rounded-lg p-6 relative">
-                        <img 
-                            src={product.image} 
-                            alt={product.name} 
-                            className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" 
-                            onError={(e) => {
-                                (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${product.id}/300/300`;
-                            }}
+                        <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
                         />
                     </div>
 
@@ -68,7 +66,7 @@ export const ProductCarousel: React.FC = () => {
                                 <span className="text-sm font-bold text-[#dc2626]">${unitPrice}</span>
                             </div>
                         </div>
-                        
+
                         <button className="w-full bg-[#0f172a] text-white py-3 rounded-md text-xs font-black uppercase tracking-widest hover:bg-[#dc2626] transition-all flex items-center justify-center gap-2 shadow-sm">
                             <ShoppingCart size={14} /> Add to Order
                         </button>

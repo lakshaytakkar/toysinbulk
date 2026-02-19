@@ -1,11 +1,13 @@
 import React from 'react';
 import { Mail, ShieldCheck, Truck, CreditCard, Phone } from 'lucide-react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onNavigate: (view: 'home' | 'collection' | 'product') => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
     <footer className="bg-white border-t border-gray-200 mt-12 font-sans text-gray-600">
-      
-      {/* Trust Signals */}
       <div className="border-b border-gray-200 bg-gray-50">
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-10">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -57,22 +59,22 @@ export const Footer: React.FC = () => {
             <div>
                 <h4 className="font-bold text-[#0f172a] text-sm uppercase tracking-widest mb-6">Customer Service</h4>
                 <ul className="space-y-3">
-                    <li><a href="#" className="hover:text-[#dc2626] transition-colors">Contact Us</a></li>
-                    <li><a href="#" className="hover:text-[#dc2626] transition-colors">Shipping Policy</a></li>
-                    <li><a href="#" className="hover:text-[#dc2626] transition-colors">Return Policy</a></li>
-                    <li><a href="#" className="hover:text-[#dc2626] transition-colors">Track Order</a></li>
-                    <li><a href="#" className="hover:text-[#dc2626] transition-colors">Volume Discounts</a></li>
+                    <li><button onClick={() => onNavigate('home')} className="hover:text-[#dc2626] transition-colors">Contact Us</button></li>
+                    <li><button onClick={() => onNavigate('home')} className="hover:text-[#dc2626] transition-colors">Shipping Policy</button></li>
+                    <li><button onClick={() => onNavigate('home')} className="hover:text-[#dc2626] transition-colors">Return Policy</button></li>
+                    <li><button onClick={() => onNavigate('home')} className="hover:text-[#dc2626] transition-colors">Track Order</button></li>
+                    <li><button onClick={() => onNavigate('home')} className="hover:text-[#dc2626] transition-colors">Volume Discounts</button></li>
                 </ul>
             </div>
 
              <div>
                 <h4 className="font-bold text-[#0f172a] text-sm uppercase tracking-widest mb-6">Company Info</h4>
                 <ul className="space-y-3">
-                    <li><a href="#" className="hover:text-[#dc2626] transition-colors">About Us</a></li>
-                    <li><a href="#" className="hover:text-[#dc2626] transition-colors">Careers</a></li>
-                    <li><a href="#" className="hover:text-[#dc2626] transition-colors">Vendor Compliance</a></li>
-                    <li><a href="#" className="hover:text-[#dc2626] transition-colors">Privacy Policy</a></li>
-                    <li><a href="#" className="hover:text-[#dc2626] transition-colors">Terms of Service</a></li>
+                    <li><button onClick={() => onNavigate('home')} className="hover:text-[#dc2626] transition-colors">About Us</button></li>
+                    <li><button onClick={() => onNavigate('home')} className="hover:text-[#dc2626] transition-colors">Careers</button></li>
+                    <li><button onClick={() => onNavigate('home')} className="hover:text-[#dc2626] transition-colors">Vendor Compliance</button></li>
+                    <li><button onClick={() => onNavigate('home')} className="hover:text-[#dc2626] transition-colors">Privacy Policy</button></li>
+                    <li><button onClick={() => onNavigate('home')} className="hover:text-[#dc2626] transition-colors">Terms of Service</button></li>
                 </ul>
             </div>
 
@@ -85,13 +87,13 @@ export const Footer: React.FC = () => {
                 </div>
             </div>
         </div>
-        
+
         <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-gray-500">
-             <p>© 2024 ToysinBulk Distribution Inc. All Rights Reserved.</p>
+             <p>&copy; 2026 ToysinBulk Distribution Inc. All Rights Reserved.</p>
              <div className="flex gap-4">
-                <span>Privacy</span>
-                <span>Terms</span>
-                <span>Sitemap</span>
+                <span className="cursor-pointer hover:text-[#0f172a]">Privacy</span>
+                <span className="cursor-pointer hover:text-[#0f172a]">Terms</span>
+                <span className="cursor-pointer hover:text-[#0f172a]">Sitemap</span>
              </div>
         </div>
       </div>

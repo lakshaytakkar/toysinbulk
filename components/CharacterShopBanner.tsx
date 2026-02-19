@@ -1,6 +1,10 @@
 import React from 'react';
 
-export const CharacterShopBanner: React.FC = () => {
+interface CharacterShopBannerProps {
+  onNavigate: (view: 'home' | 'collection' | 'product') => void;
+}
+
+export const CharacterShopBanner: React.FC<CharacterShopBannerProps> = ({ onNavigate }) => {
   return (
     <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-20">
       <div className="bg-[#0f172a] rounded-lg overflow-hidden shadow-xl">
@@ -12,21 +16,17 @@ export const CharacterShopBanner: React.FC = () => {
                     Stock your shelves with the characters kids love. We are an authorized distributor for major entertainment brands, ensuring authentic merchandise at wholesale margins.
                 </p>
                 <div className="flex gap-4">
-                     <button className="bg-white text-[#0f172a] px-8 py-3 rounded font-bold hover:bg-gray-100 transition-colors">
+                     <button onClick={() => onNavigate('collection')} className="bg-white text-[#0f172a] px-8 py-3 rounded font-bold hover:bg-gray-100 transition-colors">
                         View Licensed Catalog
                      </button>
                 </div>
             </div>
-            <div className="bg-gray-800 relative h-64 md:h-auto overflow-hidden">
-                {/* Abstract representation of brands - could be logos in real app */}
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
-                     <div className="grid grid-cols-2 gap-8 opacity-20">
-                        <div className="w-32 h-12 bg-white rounded"></div>
-                        <div className="w-32 h-12 bg-white rounded"></div>
-                        <div className="w-32 h-12 bg-white rounded"></div>
-                        <div className="w-32 h-12 bg-white rounded"></div>
-                     </div>
-                </div>
+            <div className="relative h-64 md:h-auto overflow-hidden">
+                <img
+                    src="/images/character-shop-banner.png"
+                    alt="Licensed character toys and merchandise"
+                    className="w-full h-full object-cover"
+                />
             </div>
         </div>
       </div>
